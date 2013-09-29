@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.4.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+
+	<configuration doc:name="Configuration">
+		<expression-language>
+			<import class="org.mule.util.StringUtils" />
+		</expression-language>
+	</configuration>
+
+	<flow name="PoorMansRESTFlow" doc:name="PoorMansRESTFlow">
+		<http:inbound-endpoint exchange-pattern="request-response"
+			host="localhost" port="8088" doc:name="HTTP">
+		</http:inbound-endpoint>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<choice doc:name="Choice">
+			<when expression="#[regex('client/\\w+/\\w+/get/?', message.inboundProperties['http.relative.path'])]">
+				<choice doc:name="Choice">
+					<when expression="message.inboundProperties['http.method'] == 'GET'">
+                            <flow-ref name="RetrievingParameters" doc:name="Retrieve Parameters"/>
+                        <flow-ref name="ProcessGET" doc:name="Process GET"/>
+					</when>
+					<when expression="message.inboundProperties['http.method'] == 'POST'">
+                        <flow-ref name="RetrievingParameters" doc:name="Retrieve Parameters"/>
+                        <flow-ref name="ProcessPOST" doc:name="Process POST"/>
+					</when>
+					<otherwise>
+						<http:response-builder status="400"
+							doc:name="Return 400 For bad HTTP method">
+							<set-payload
+								value="Unknown HTTP method: #[message.inboundProperties['http.method']]" />
+						</http:response-builder>
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<http:response-builder status="400"
+					doc:name="Return 400 For bad URL">
+					<set-payload
+						value="Unknown resource: #[message.inboundProperties['http.relative.path']]" />
+				</http:response-builder>
+			</otherwise>
+		</choice>
+	</flow>
+    <sub-flow name="RetrievingParameters" doc:name="RetrievingParameters">
+        <set-variable variableName="accountID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.relative.path'], '/')[1]]" doc:name="Set Account ID"/>
+        <set-variable variableName="userID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.relative.path'], '/')[2]]" doc:name="Set User ID"/>
+    </sub-flow>
+    <flow name="ProcessPOST" doc:name="ProcessPOST">
+        <http:response-builder status="200"	doc:name="Return OK">
+        	<set-payload value="Processing POST with account id: #[accountID] and user id: #[userID] and body: #[payload]" doc:name="Set Payload"/>
+		</http:response-builder>
+        
+    </flow>
+    <flow name="ProcessGET" doc:name="ProcessGET">
+    	<http:response-builder status="200"	doc:name="Return OK">
+        	<set-payload value="Processing GET with account id: #[accountID] and user id: #[userID]" doc:name="Set Payload"/>
+        </http:response-builder>
+    </flow>
+</mule>

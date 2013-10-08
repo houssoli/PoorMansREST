@@ -26,8 +26,8 @@ public class PoorMansRESTTest extends FunctionalMunitSuite {
 	private static final String ACC_ID = "123";
 	private static final String USER_ID = "456";
 
-	private static final String GOOD_PATH = "client/" + ACC_ID + "/" + USER_ID + "/get";
-	private static final String HTTP_PATH = "http.relative.path";
+	private static final String GOOD_PATH = "/client/" + ACC_ID + "/" + USER_ID + "/get";
+	private static final String HTTP_PATH = "http.request.path";
 	private static final String HTTP_METHOD = "http.method";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
@@ -51,12 +51,12 @@ public class PoorMansRESTTest extends FunctionalMunitSuite {
 
 	@SuppressWarnings("unused")
 	private Object[] badURLs() {
-		return $($(ImmutableMap.of(HTTP_METHOD, POST, HTTP_PATH, "client_s/123/456/get")),
-				$(ImmutableMap.of(HTTP_METHOD, POST, HTTP_PATH, "client/123/456")),
-				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "client/123/456/")),
-				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "123/456/client/get")),
-				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "client/123/ /get")),
-				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "client//456/get")));
+		return $($(ImmutableMap.of(HTTP_METHOD, POST, HTTP_PATH, "/client_s/123/456/get")),
+				$(ImmutableMap.of(HTTP_METHOD, POST, HTTP_PATH, "/client/123/456")),
+				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "/client/123/456/")),
+				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "/123/456/client/get")),
+				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "/client/123/ /get")),
+				$(ImmutableMap.of(HTTP_METHOD, GET, HTTP_PATH, "/client//456/get")));
 	}
 
 	@Test

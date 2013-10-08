@@ -27,7 +27,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 			</not-filter>
 		</message-filter>
 		<choice doc:name="Choice">
-			<when expression="#[regex('client/\\w+/\\w+/get/?', message.inboundProperties['http.relative.path'])]">
+			<when expression="#[regex('/client/\\w+/\\w+/get/?', message.inboundProperties['http.request.path'])]">
 				<choice doc:name="Choice">
 					<when expression="message.inboundProperties['http.method'] == 'GET'">
                             <flow-ref name="RetrievingParameters" doc:name="Retrieve Parameters"/>
@@ -50,14 +50,14 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 				<http:response-builder status="400"
 					doc:name="Return 400 For bad URL">
 					<set-payload
-						value="Unknown resource: #[message.inboundProperties['http.relative.path']]" />
+						value="Unknown resource: #[message.inboundProperties['http.request.path']]" />
 				</http:response-builder>
 			</otherwise>
 		</choice>
 	</flow>
     <sub-flow name="RetrievingParameters" doc:name="RetrievingParameters">
-        <set-variable variableName="accountID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.relative.path'], '/')[1]]" doc:name="Set Account ID"/>
-        <set-variable variableName="userID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.relative.path'], '/')[2]]" doc:name="Set User ID"/>
+        <set-variable variableName="accountID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.request.path'], '/')[1]]" doc:name="Set Account ID"/>
+        <set-variable variableName="userID" value="#[StringUtils.splitAndTrim(message.inboundProperties['http.request.path'], '/')[2]]" doc:name="Set User ID"/>
     </sub-flow>
     <flow name="ProcessPOST" doc:name="ProcessPOST">
         <http:response-builder status="200"	doc:name="Return OK">

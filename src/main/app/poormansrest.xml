@@ -38,8 +38,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
                         <flow-ref name="ProcessPOST" doc:name="Process POST"/>
 					</when>
 					<otherwise>
-						<http:response-builder status="400"
-							doc:name="Return 400 For bad HTTP method">
+						<http:response-builder status="405"
+							doc:name="Return 405 For bad HTTP method">
 							<set-payload
 								value="Unknown HTTP method: #[message.inboundProperties['http.method']]" />
 						</http:response-builder>
